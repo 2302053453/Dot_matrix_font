@@ -6,10 +6,13 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->setStyleSheet(loadTheme("light"));
     //设置字体大小
     for(int i=8;i<=32;i++){
         ui->comboBoxSize->addItem(QString::number(i));
     }
+    ui->comboBoxSize->setCurrentText(QString::number(16));
+    ui->comboBoxType->setCurrentText("16×16");
 
     font_color = Qt::red;
     lcd_type = 16;
@@ -75,7 +78,7 @@ void MainWindow::drawText(QString text)
 
     //代码计算
     int count=0;
-    QString result;
+    QString cResult,asmResult="DB ";
     QImage img = image;
     for(int i=0;i<size;i++){
         QByteArray byte;
@@ -87,13 +90,16 @@ void MainWindow::drawText(QString text)
             else byte.append('0');
             if((j+1)%8==0){
                 count++;
-                result += toHex(byte)+',';
+                cResult += "0x"+toHex(byte)+',';
+                asmResult += toHex(byte)+"H,";
                 byte.clear();
-                if(count%8==0) result+='\n';
+                if(count%8==0) cResult+='\n';
+                if(count%32==0) asmResult+="\nDB ";
             }
         }
     }
-    ui->textResultC->setPlainText(result);
+    ui->textResultC->setPlainText("const char tab[]={"+cResult+"};");
+    ui->textResultASM->setPlainText(asmResult);
 }
 //将QByteArray转换为十六进制字符串
 QString MainWindow::toHex(QByteArray byte)
@@ -105,7 +111,7 @@ QString MainWindow::toHex(QByteArray byte)
         temp*=2;
     }
 
-    return "0x"+QString::number(sum,16);
+    return QString::number(sum,16).toUpper();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
