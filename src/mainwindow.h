@@ -17,8 +17,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void drawText(QString text, int size);
+    void drawText(QString text);
     QString toHex(QByteArray byte);
+
+protected:
+    void resizeEvent(QResizeEvent *event);
 
 private slots:
     void on_actionExit_triggered();
@@ -31,8 +34,6 @@ private slots:
 
     void on_textText_textChanged();
 
-    void on_comboBoxW_activated(const QString &text);
-
     void on_comboBoxFont_currentIndexChanged(int index);
 
     void on_buttonChooseColor_clicked();
@@ -41,5 +42,8 @@ private:
     Ui::MainWindow *ui;
 
     QColor font_color;
+
+    int font_size;
+    int lcd_type;
 };
 #endif // MAINWINDOW_H

@@ -6,7 +6,13 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    //设置字体大小
+    for(int i=8;i<=32;i++){
+        ui->comboBoxSize->addItem(QString::number(i));
+    }
+
     font_color = Qt::red;
+    lcd_type = 16;
 }
 
 MainWindow::~MainWindow() {
@@ -31,8 +37,9 @@ void MainWindow::on_actionIndex_triggered() {
     QDesktopServices::openUrl(QUrl(IndexUrl));
 }
 
-void MainWindow::drawText(QString text,int size)
+void MainWindow::drawText(QString text)
 {
+    int size=ui->comboBoxSize->currentText().toInt();
     QImage image(QSize(size,size),QImage::Format_Mono);
     QPainter painter(&image);
     QRgb     backColor = qRgb(255, 255, 255);
@@ -86,7 +93,7 @@ void MainWindow::drawText(QString text,int size)
             }
         }
     }
-    ui->textResultCpp->setPlainText(result);
+    ui->textResultC->setPlainText(result);
 }
 //将QByteArray转换为十六进制字符串
 QString MainWindow::toHex(QByteArray byte)
@@ -101,18 +108,36 @@ QString MainWindow::toHex(QByteArray byte)
     return "0x"+QString::number(sum,16);
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event)
+    int width=this->width();
+    int height=this->height();
+    ui->frameDisplay->setGeometry(0,0,width*2/3,height/2);
+    ui->frameInput->setGeometry(width*2/3,0,width-width*2/3,height/2);
+    ui->frameResult->setGeometry(0,height/2,width,height-height/2);
+}
+
 void MainWindow::on_textText_textChanged()
 {
     QString text = ui->textText->toPlainText();
     if(text.isEmpty()) return;
     qDebug()<<"Current text is: "<<text;
-    int size = ui->comboBoxW->currentText().toInt();
-    drawText(text,size);
-}
+    //确定点阵尺寸
+    switch(ui->comboBoxType->currentIndex()){
+    case 0:
+        lcd_type=8;
+        break;
+    case 1:
+        lcd_type=16;
+        break;
+    case 2:
+        lcd_type=32;
+        break;
+    }
 
-void MainWindow::on_comboBoxW_activated(const QString &text)
-{
-    if(!ui->textText->toPlainText().isEmpty()) on_textText_textChanged();
+    font_size = ui->comboBoxSize->currentText().toInt();
+    drawText(text);
 }
 
 void MainWindow::on_comboBoxFont_currentIndexChanged(int index)
